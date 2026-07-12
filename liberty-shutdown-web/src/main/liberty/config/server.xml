@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<server description="Liberty Shutdown App">
+    <featureManager>
+        <feature>jakartaee-10.0</feature>
+        <feature>bells-1.0</feature>
+    </featureManager>
+
+    <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="9080" httpsPort="9443"/>
+
+    <webApplication location="liberty-shutdown-web.war" contextRoot="/">
+        <classloader commonLibraryRef="QuiesceRegistrationListener,FrameworkStateUtilImpl,FrameworkStateUtil"/>
+    </webApplication>
+
+    <basicRegistry id="basic" realm="BasicRealm">
+        <user name="wasadm" password="start123."/>
+    </basicRegistry>
+
+    <library id="QuiesceRegistrationListener">
+        <fileset dir="${server.config.dir}/lib" includes="liberty-shutdown-listener-1.0-SNAPSHOT.jar" />
+    </library>
+
+    <library id="FrameworkStateUtil">
+        <fileset dir="${server.config.dir}/lib" includes="liberty-shutdown-frameworkstate-interface-1.0-SNAPSHOT.jar" />
+    </library>
+
+    <library id="FrameworkStateUtilImpl">
+        <fileset dir="${server.config.dir}/lib" includes="liberty-shutdown-frameworkstate-1.0-SNAPSHOT.jar" />
+    </library>
+
+    <bell libraryRef="FrameworkStateUtilImpl" spiVisibility="true">
+        <classloader commonLibraryRef="FrameworkStateUtil" />
+    </bell>
+
+    <bell libraryRef="QuiesceRegistrationListener" spiVisibility="true"/>
+
+    <applicationManager autoExpand="true"/>
+
+</server>
