@@ -8,26 +8,18 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ServiceLoader;
 import java.util.logging.Logger;
-import at.hhue.shutdown.frameworkstate.ShutdownStateInterface;
 
 @WebServlet(name = "HelloWorldServlet", urlPatterns = "/hello")
 public class HelloWorldServlet extends HttpServlet {
     private static final String PROP_STOPPING = "at.hhue.server.stopping";
     private static final Logger logger = Logger.getLogger(HelloWorldServlet.class.getName());
-    private static final ServiceLoader<ShutdownStateInterface> loader = ServiceLoader
-            .load(ShutdownStateInterface.class);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         LocalDateTime localDateTime;
         boolean frameworkIsStopping = false;
-        boolean getFrameworkState = false;
         int numLoops = 30;
         int i;
-
-        getFrameworkState = Boolean.parseBoolean(req.getParameter("getFrameworkState"));
-
-        logger.info("Loaded ServiceLoader: " + loader.toString());
 
         // Check early — bail out if the server is shutting down.
         if ("true".equals(System.getProperty(PROP_STOPPING))) {
@@ -47,20 +39,6 @@ public class HelloWorldServlet extends HttpServlet {
             resp.getWriter().write(
                     "Shutdown isStopping at " + localDateTime.toString() + ": "
                             + System.getProperty(PROP_STOPPING, "false")
-                            + "\n");
-            if (getFrameworkState) {
-                logger.info("Getting state from Framework");
-                for (ShutdownStateInterface checker : loader) {
-                    logger.info("Checking state from Framework");
-                    if (checker.isStopping()) {
-                        frameworkIsStopping = true;
-                        break;
-                    }
-                }
-            }
-            resp.getWriter().write(
-                    "Shutdown frameworkIsStopping at " + localDateTime.toString() + ": "
-                            + frameworkIsStopping
                             + "\n");
             resp.getWriter().write("Loop Count: " + String.valueOf(i) + "\n");
             //
